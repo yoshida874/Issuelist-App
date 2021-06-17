@@ -5,8 +5,10 @@ import (
 	"net/http"
 	"os"
 
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/issue-list/src"
 )
 
 func main() {
@@ -19,12 +21,11 @@ func main() {
   */ 
   e.Use(middleware.Logger())
   e.Use(middleware.Recover())
-
-  // Routes
-  e.POST("/save", save)
-  e.GET("/users/:id", getUser)
-  e.GET("/show", show)
-  // e.PUT("/users/:id", updateUser)
+  
+  e.POST("/save", Save)
+  e.GET("/users/:id", GetUser)
+  e.GET("/show", Show)
+  e.GET("/issue", issue.IssueRead)
   // e.DELETE("/users/:id", deleteUser)
 
   // Start server
@@ -32,14 +33,14 @@ func main() {
 }
 
 // http://localhost:1323/users/Joe
-func getUser(c echo.Context) error {
+func GetUser(c echo.Context) error {
   var id string = c.Param("id")
   return c.String(http.StatusOK, id)
 }
 
 // 複数クエリ
 // http://localhost:1323/show?team=x-men&member=wolverine
-func show(c echo.Context) error {
+func Show(c echo.Context) error {
   team := c.QueryParam("team")
 	member := c.QueryParam("member")
 	return c.String(http.StatusOK, "team:" + team + ", member:" + member)
@@ -52,8 +53,9 @@ func show(c echo.Context) error {
 // 	return c.String(http.StatusOK, "name:" + name + ", email:" + email)
 // }
 
+
 // multipart/form-data
-func save(c echo.Context) error {
+func Save(c echo.Context) error {
 	// Get name
 	name := c.FormValue("name")
 	// Get avatar
