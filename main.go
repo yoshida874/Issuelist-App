@@ -25,9 +25,11 @@ func main() {
   e.POST("/save", Save)
   e.GET("/users/:id", GetUser)
   e.GET("/show", Show)
-  e.GET("/issue", issue.IssueRead)
   // e.DELETE("/users/:id", deleteUser)
 
+  // issueのデータを取得するAPI群
+  issue.InitRouting(e)
+  
   // Start server
   e.Logger.Fatal(e.Start(":1323"))
 }
