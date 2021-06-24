@@ -1,4 +1,4 @@
-package dbProvider
+package dbprovider
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
+
 
 // Firestoreの初期化
 func Init(ctx context.Context) (*firestore.Client, error) {
@@ -33,7 +34,7 @@ func Init(ctx context.Context) (*firestore.Client, error) {
 }
 
 // コレクション全ての読み込み処理
-func Read() []interface {} {
+func AllRead() map[string][]interface{} {
 	ctx := context.Background()
 	// 初期化する
 	cilent, err := Init(ctx)
@@ -41,7 +42,8 @@ func Read() []interface {} {
 		log.Fatalln(err)
 	}
 	iter := cilent.Collection("Issue").Documents(ctx)
-	var allData []interface {}
+	// var allData []interface {}
+	res := make(map[string][]interface{})
 	for {
 			doc, err := iter.Next()
 			if err == iterator.Done {
@@ -51,8 +53,29 @@ func Read() []interface {} {
 				log.Fatalf("Failed to iterate: %v", err)
 			}
 			fmt.Println(doc.Data())
-			allData = append(allData, doc.Data())
+			res["value"] = append(res["value"],  doc.Data())
+			// allData = doc.Data()
 		}
 	defer cilent.Close()
-	return allData
+
+	return res
+}
+
+func Read() map[string]interface{} {
+	ctx := context.Background()
+	// 初期化する
+	cilent, err := Init(ctx)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	dsnap, err := cilent.Collection("Issue").Doc("UYku2uPU4QdAP3rylfyX").Get(ctx)
+	if err != nil {
+		log.Fatalf("Failed to iterate: %v", err)
+	}
+	data := dsnap.Data()
+
+	defer cilent.Close()
+
+	return data
 }
