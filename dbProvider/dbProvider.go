@@ -12,7 +12,6 @@ import (
 	"google.golang.org/api/option"
 )
 
-
 // Firestoreの初期化
 func Init(ctx context.Context) (*firestore.Client, error) {
 
@@ -30,8 +29,28 @@ func Init(ctx context.Context) (*firestore.Client, error) {
 		return nil, err
 	}
 	return client, nil
-
 }
+
+func Read() map[string]interface{} {
+	ctx := context.Background()
+	// 初期化する
+	cilent, err := Init(ctx)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	//TODO: ID固定値
+	dsnap, err := cilent.Collection("Issue").Doc("UYku2uPU4QdAP3rylfyX").Get(ctx)
+	if err != nil {
+		log.Fatalf("Failed to iterate: %v", err)
+	}
+	data := dsnap.Data()
+
+	defer cilent.Close()
+
+	return data
+}
+
 
 // コレクション全ての読み込み処理
 func AllRead() map[string][]interface{} {
@@ -61,21 +80,23 @@ func AllRead() map[string][]interface{} {
 	return res
 }
 
-func Read() map[string]interface{} {
+
+func Update(id string, body string) {
 	ctx := context.Background()
-	// 初期化する
 	cilent, err := Init(ctx)
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	dsnap, err := cilent.Collection("Issue").Doc("UYku2uPU4QdAP3rylfyX").Get(ctx)
+	_, err = cilent.Collection("Issue").Doc("UYku2uPU4QdAP3rylfyX").Update(ctx, []firestore.Update{
+		{
+			Path:  "body",
+            Value: body,
+		},
+	})
 	if err != nil {
-		log.Fatalf("Failed to iterate: %v", err)
+		log.Fatalln(err)
 	}
-	data := dsnap.Data()
-
 	defer cilent.Close()
 
-	return data
+	return
 }

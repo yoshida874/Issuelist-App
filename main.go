@@ -5,15 +5,23 @@ import (
 	"net/http"
 	"os"
 
-
+	issue "github.com/issue-list/src"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/issue-list/src"
 )
 
 func main() {
   // Echo instance
   e := echo.New()
+
+  var allowedOrigins = []string{
+	  "http://localhost:3000",
+  }
+  e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+	  AllowOrigins: allowedOrigins,
+  }))
+  //CORSサーバー設定
+  e.Use(middleware.CORS())
 
   /*
   Logger: httpのrequestをログで出力
