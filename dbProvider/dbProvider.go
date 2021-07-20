@@ -32,24 +32,32 @@ func Init(ctx context.Context) (*firestore.Client, error) {
 	return client, nil
 }
 
-func Read() map[string]interface{} {
+func Read(id int)map[string]interface{} {
 	ctx := context.Background()
 	// 初期化する
-	cilent, err := Init(ctx)
+	client, err := Init(ctx)
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	//TODO: ID固定値
-	dsnap, err := cilent.Collection("Issue").Doc("UYku2uPU4QdAP3rylfyX").Get(ctx)
-	if err != nil {
-		log.Fatalf("Failed to iterate: %v", err)
+	res := make(map[string]interface{})
+	//TODO ID固定値
+	iter := client.Collection("Issue").Where("id", "==", id).Documents(ctx)
+	for {
+			doc, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				log.Fatalf("Failed to iterate: %v", err)
+			}
+			fmt.Println(doc.Ref.ID)
+			fmt.Println(doc.Data())
+			res = doc.Data()
+			res["documentID"] = doc.Ref.ID
 	}
-	data := dsnap.Data()
+	defer client.Close()
 
-	defer cilent.Close()
-
-	return data
+	return res
 }
 
 
@@ -57,12 +65,11 @@ func Read() map[string]interface{} {
 func AllRead() map[string][]interface{} {
 	ctx := context.Background()
 	// 初期化する
-	cilent, err := Init(ctx)
+	client, err := Init(ctx)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	iter := cilent.Collection("Issue").Documents(ctx)
-	// var allData []interface {}
+	iter := client.Collection("Issue").Documents(ctx)
 	res := make(map[string][]interface{})
 	for {
 			doc, err := iter.Next()
@@ -74,9 +81,9 @@ func AllRead() map[string][]interface{} {
 			}
 			fmt.Println(doc.Data())
 			res["value"] = append(res["value"],  doc.Data())
-			// allData = doc.Data()
-		}
-	defer cilent.Close()
+	}
+	
+	defer client.Close()
 
 	return res
 }
@@ -84,9 +91,9 @@ func AllRead() map[string][]interface{} {
 
 func Update(id string, body string, isClosed bool) error {
 	ctx := context.Background()
-	cilent, err := Init(ctx)
+	client, err := Init(ctx)
 	if err != nil {
-		defer cilent.Close()
+		defer client.Close()
 		log.Fatalln(err)
 		return fmt.Errorf("Init fail: %w", err)
 	}
@@ -125,8 +132,8 @@ func Update(id string, body string, isClosed bool) error {
 		}
 	}
 
-	_, err = cilent.Collection("Issue").Doc("UYku2uPU4QdAP3rylfyX").Update(ctx, p)
-	defer cilent.Close()
+	_, err = client.Collection("Issue").Doc(id).Update(ctx, p)
+	defer client.Close()
 	if err != nil {
 		log.Fatalln(err)
 		return fmt.Errorf("update fail: %w", err)

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	dbprovider "github.com/issue-list/dbProvider"
 	"github.com/labstack/echo/v4"
@@ -17,7 +18,9 @@ func InitRouting(e *echo.Echo) {
 
 //1件読み込み
 func IssueRead(c echo.Context) error {
-	res := dbprovider.Read()
+	strID := c.QueryParam("id")
+	i, _ := strconv.Atoi(strID)
+	res := dbprovider.Read(i)
 	jsonStr, err := json.Marshal(res)
 	if err != nil {
 		fmt.Println("JSON marshal error: ", err)
