@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	issue "github.com/issue-list/src"
+	issue "github.com/issue-list/issue"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )

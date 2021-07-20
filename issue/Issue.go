@@ -37,18 +37,25 @@ func IssueAllRead(c echo.Context) error {
 	return c.JSON(http.StatusOK, string(jsonStr))
 }
 
-type PutIssue struct {
+type IssUpdate struct {
     Id string `json:"id"`
 	Body string `json:"body"`
+	IsClosed bool `json:"isClosed"`
 }
+
 // idを指定してupdate
 // applcation/json
 func IssueUpdate(c echo.Context) error {
-	var p PutIssue
-	if err := c.Bind(&p);err != nil {
+	var u IssUpdate
+	if err := c.Bind(&u);err != nil {
 		fmt.Println(err)
+		return c.String(http.StatusOK, err.Error())
 	}
-	dbprovider.Update(p.Id, p.Body);
+
+	if err := dbprovider.Update(u.Id, u.Body, u.IsClosed);err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusOK, err.Error())
+	}
 
 	return c.String(http.StatusOK, "echo")
 }

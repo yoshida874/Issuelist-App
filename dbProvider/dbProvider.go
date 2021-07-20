@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
@@ -81,22 +82,55 @@ func AllRead() map[string][]interface{} {
 }
 
 
-func Update(id string, body string) {
+func Update(id string, body string, isClosed bool) error {
 	ctx := context.Background()
 	cilent, err := Init(ctx)
 	if err != nil {
+		defer cilent.Close()
 		log.Fatalln(err)
+		return fmt.Errorf("Init fail: %w", err)
 	}
-	_, err = cilent.Collection("Issue").Doc("UYku2uPU4QdAP3rylfyX").Update(ctx, []firestore.Update{
-		{
-			Path:  "body",
-            Value: body,
-		},
-	})
+
+	var p []firestore.Update
+	time := time.Now()
+	if isClosed {
+		p = []firestore.Update{
+			{
+				Path: "body",
+				Value: body,
+			},
+			{
+				Path: "updateAt",
+				Value: time,
+			},
+			{
+				Path: "isClosed",
+				Value: isClosed,
+			},
+			{
+				Path: "closedAt",
+				Value: time,
+			},
+		}
+	} else {
+		p = []firestore.Update{
+			{
+				Path: "body",
+				Value: body,
+			},
+			{
+				Path: "updateAt",
+				Value: time,
+			},
+		}
+	}
+
+	_, err = cilent.Collection("Issue").Doc("UYku2uPU4QdAP3rylfyX").Update(ctx, p)
+	defer cilent.Close()
 	if err != nil {
 		log.Fatalln(err)
+		return fmt.Errorf("update fail: %w", err)
 	}
-	defer cilent.Close()
 
-	return
+	return nil
 }
