@@ -14,6 +14,7 @@ func InitRouting(e *echo.Echo) {
 	e.GET("/issue", IssueRead)
 	e.GET("/issue/all", IssueAllRead)
 	e.PUT("issue/update", IssueUpdate)
+	e.POST("issue/create", IssueCreate)
 }
 
 //1件読み込み
@@ -49,13 +50,33 @@ type IssUpdate struct {
 // idを指定してupdate
 // applcation/json
 func IssueUpdate(c echo.Context) error {
-	var u IssUpdate
-	if err := c.Bind(&u);err != nil {
+	var i IssUpdate
+	if err := c.Bind(&i);err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusOK, err.Error())
 	}
 
-	if err := dbprovider.Update(u.Id, u.Body, u.IsClosed);err != nil {
+	if err := dbprovider.Update(i.Id, i.Body, i.IsClosed);err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusOK, err.Error())
+	}
+
+	return c.String(http.StatusOK, "echo")
+}
+
+type IssCreate struct {
+	Title string `json:"title"`
+	Body string `json:"body"`
+}
+
+func IssueCreate(c echo.Context) error {
+	var i IssCreate
+	if err := c.Bind(&i);err != nil {
+		fmt.Println(err)
+		return c.String(http.StatusOK, err.Error())
+	}
+
+	if err := dbprovider.Create(i.Title, i.Body);err != nil {
 		fmt.Println(err)
 		return c.String(http.StatusOK, err.Error())
 	}

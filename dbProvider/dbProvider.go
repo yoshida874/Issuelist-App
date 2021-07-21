@@ -89,6 +89,28 @@ func AllRead() map[string][]interface{} {
 }
 
 
+// 新しいissueを作成する
+func Create(title string, body string) error {
+	ctx := context.Background()
+	client, err := Init(ctx)
+	if err != nil {
+		defer client.Close()
+		log.Fatalln(err)
+		return fmt.Errorf("Init fail: %w", err)
+	}
+
+	_, _, aderr := client.Collection("Issue").Add(ctx, map[string]interface{}{
+        "title": title,
+        "body": body,
+	})
+	if aderr != nil {
+		return fmt.Errorf("create fail: %w", aderr)
+	}
+
+	return nil
+}
+
+
 func Update(id string, body string, isClosed bool) error {
 	ctx := context.Background()
 	client, err := Init(ctx)
