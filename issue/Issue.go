@@ -30,9 +30,14 @@ func IssueRead(c echo.Context) error {
 	return c.JSON(http.StatusOK, string(jsonStr))
 }
 
+
 // 全ての読み込み
 func IssueAllRead(c echo.Context) error {
-	res := dbprovider.AllRead()
+	oRes := dbprovider.OpenRead()
+	cRes := dbprovider.ClosedRead()
+	res := make(map[string]interface{})
+	res["open"] = oRes
+	res["closed"] = cRes
 	jsonStr, err := json.Marshal(res)
 	if err != nil {
 		fmt.Println("JSON marshal error: ", err)

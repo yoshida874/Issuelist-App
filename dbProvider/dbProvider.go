@@ -40,7 +40,6 @@ func Read(id int)map[string]interface{} {
 		log.Fatalln(err)
 	}
 	res := make(map[string]interface{})
-	//TODO ID固定値
 	iter := client.Collection("Issue").Where("id", "==", id).Documents(ctx)
 	for {
 			doc, err := iter.Next()
@@ -88,6 +87,61 @@ func AllRead() map[string][]interface{} {
 	return res
 }
 
+// 解決済みのissueを表示する
+func ClosedRead() map[string][]interface{} {
+	ctx := context.Background()
+	// 初期化する
+	client, err := Init(ctx)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	
+	query := client.Collection("Issue").Where("isClosed", "==", true)
+	iter := query.Documents(ctx)
+	res := make(map[string][]interface{})
+	for {
+			doc, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				log.Fatalf("Failed to iterate: %v", err)
+			}
+			fmt.Println(doc.Data())
+			res["value"] = append(res["value"],  doc.Data())
+	}
+	defer client.Close()
+
+	return res
+}
+
+// 解決していないissueを表示する
+func OpenRead() map[string][]interface{} {
+	ctx := context.Background()
+	// 初期化する
+	client, err := Init(ctx)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	
+	query := client.Collection("Issue").Where("isClosed", "==", false)
+	iter := query.Documents(ctx)
+	res := make(map[string][]interface{})
+	for {
+			doc, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				log.Fatalf("Failed to iterate: %v", err)
+			}
+			fmt.Println(doc.Data())
+			res["value"] = append(res["value"],  doc.Data())
+	}
+	defer client.Close()
+
+	return res
+}
 
 // 新しいissueを作成する
 func Create(title string, body string) error {
@@ -99,9 +153,28 @@ func Create(title string, body string) error {
 		return fmt.Errorf("Init fail: %w", err)
 	}
 
-	_, _, aderr := client.Collection("Issue").Add(ctx, map[string]interface{}{
+	// 連番になるIDを生成する
+	collection := client.Collection("Issue")
+	// 値が一番大きいIDを取得する
+	query := collection.OrderBy("id", firestore.Desc).Limit(1)
+	iter := query.Documents(ctx)
+	doc, err := iter.Next()
+	if 	err != nil {
+		return err
+	}
+	data := doc.Data()
+	// interface型なので明示的に型を書く
+	id := data["id"].(int64) + 1
+
+	time := time.Now()
+
+	_, _, aderr := collection.Add(ctx, map[string]interface{}{
+		"id": id,
         "title": title,
         "body": body,
+		"createAt": time,
+		"updateAt": time,
+		"isClosed": false,
 	})
 	if aderr != nil {
 		return fmt.Errorf("create fail: %w", aderr)
