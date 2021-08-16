@@ -1,4 +1,4 @@
-package dbprovider
+package issue
 
 import (
 	"context"
@@ -183,8 +183,8 @@ func Create(title string, body string) error {
 	return nil
 }
 
-
-func Update(id string, body string, isClosed bool) error {
+// issueのコメントupdate
+func UpdComment(id string, body string) error {
 	ctx := context.Background()
 	client, err := Init(ctx)
 	if err != nil {
@@ -195,36 +195,15 @@ func Update(id string, body string, isClosed bool) error {
 
 	var p []firestore.Update
 	time := time.Now()
-	if isClosed {
-		p = []firestore.Update{
-			{
-				Path: "body",
-				Value: body,
-			},
-			{
-				Path: "updateAt",
-				Value: time,
-			},
-			{
-				Path: "isClosed",
-				Value: isClosed,
-			},
-			{
-				Path: "closedAt",
-				Value: time,
-			},
-		}
-	} else {
-		p = []firestore.Update{
-			{
-				Path: "body",
-				Value: body,
-			},
-			{
-				Path: "updateAt",
-				Value: time,
-			},
-		}
+	p = []firestore.Update{
+		{
+			Path: "body",
+			Value: body,
+		},
+		{
+			Path: "updateAt",
+			Value: time,
+		},
 	}
 
 	_, err = client.Collection("Issue").Doc(id).Update(ctx, p)
@@ -234,5 +213,17 @@ func Update(id string, body string, isClosed bool) error {
 		return fmt.Errorf("update fail: %w", err)
 	}
 
+	return nil
+}
+
+func UpdClose(id string, isClosed bool) error {
+	ctx := context.Background()
+	client, err := Init(ctx)
+	if err != nil {
+		defer client.Close()
+		log.Fatalln(err)
+		return fmt.Errorf("Init fail: %w", err)
+	}
+	
 	return nil
 }
