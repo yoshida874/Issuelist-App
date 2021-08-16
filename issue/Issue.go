@@ -33,11 +33,18 @@ func IssueRead(c echo.Context) error {
 
 // 全ての読み込み
 func IssueAllRead(c echo.Context) error {
-	oRes := dbprovider.OpenRead()
-	cRes := dbprovider.ClosedRead()
+
 	res := make(map[string]interface{})
-	res["open"] = oRes
-	res["closed"] = cRes
+
+	if c.QueryParam("isPath") == "true" {
+		res["path"] = dbprovider.AllRead()
+	}else{
+		oRes := dbprovider.OpenRead()
+		cRes := dbprovider.ClosedRead()
+		res["open"] = oRes
+		res["closed"] = cRes
+	}
+
 	jsonStr, err := json.Marshal(res)
 	if err != nil {
 		fmt.Println("JSON marshal error: ", err)
