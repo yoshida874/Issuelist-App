@@ -183,7 +183,7 @@ func Create(title string, body string) error {
 	return nil
 }
 
-// issueのコメントupdate
+// issueのコメントのupdate
 func UpdComment(id string, body string) error {
 	ctx := context.Background()
 	client, err := Init(ctx)
@@ -193,9 +193,8 @@ func UpdComment(id string, body string) error {
 		return fmt.Errorf("Init fail: %w", err)
 	}
 
-	var p []firestore.Update
 	time := time.Now()
-	p = []firestore.Update{
+	p := []firestore.Update{
 		{
 			Path: "body",
 			Value: body,
@@ -216,6 +215,7 @@ func UpdComment(id string, body string) error {
 	return nil
 }
 
+// closeの状態を変更する
 func UpdClose(id string, isClosed bool) error {
 	ctx := context.Background()
 	client, err := Init(ctx)
@@ -224,6 +224,48 @@ func UpdClose(id string, isClosed bool) error {
 		log.Fatalln(err)
 		return fmt.Errorf("Init fail: %w", err)
 	}
-	
+
+	var p []firestore.Update
+	time := time.Now()
+	// ReOpenが押された場合
+	if isClosed {
+		p = []firestore.Update{
+			{
+				Path: "isClosed",
+				Value: false,
+			},
+			{
+				Path: "updateAt",
+				Value: time,
+			},
+			{
+				Path: "closedAt",
+				Value: nil,
+			},
+		}
+	}else{
+		p = []firestore.Update{
+			{
+				Path: "isClosed",
+				Value: true,
+			},
+			{
+				Path: "updateAt",
+				Value: time,
+			},
+			{
+				Path: "closedAt",
+				Value: time,
+			},
+		}
+	}
+
+	_, err = client.Collection("Issue").Doc(id).Update(ctx, p)
+	defer client.Close()
+	if err != nil {
+		log.Fatalln(err)
+		return fmt.Errorf("update fail: %w", err)
+	}
+
 	return nil
 }

@@ -56,7 +56,7 @@ func Show(c echo.Context) error {
 	return c.String(http.StatusOK, "team:" + team + ", member:" + member)
 }
 
-// // application/x-www-form-urlencoded
+// application/x-www-form-urlencoded
 // func save(c echo.Context) error {
 // 	name := c.FormValue("name")
 // 	email := c.FormValue("email")
