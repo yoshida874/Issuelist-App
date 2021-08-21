@@ -32,6 +32,7 @@ func Init(ctx context.Context) (*firestore.Client, error) {
 	return client, nil
 }
 
+// ドキュメント1件取得
 func Read(id int)map[string]interface{} {
 	ctx := context.Background()
 	// 初期化する
@@ -181,6 +182,37 @@ func Create(title string, body string) error {
 	}
 
 	return nil
+}
+
+func UpdTitle(id string, title string) error {
+	ctx := context.Background()
+	client, err := Init(ctx)
+	if err != nil {
+		defer client.Close()
+		log.Fatalln(err)
+		return fmt.Errorf("Init fail: %w", err)
+	}
+
+	time := time.Now()
+	p := []firestore.Update{
+		{
+			Path: "title",
+			Value: title,
+		},
+		{
+			Path: "updateAt",
+			Value: time,
+		},
+	}
+
+	_, err = client.Collection("Issue").Doc(id).Update(ctx, p)
+	defer client.Close()
+	if err != nil {
+		log.Fatalln(err)
+		return fmt.Errorf("update fail: %w", err)
+	}
+	
+	return nil	
 }
 
 // issueのコメントのupdate
