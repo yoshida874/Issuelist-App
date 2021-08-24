@@ -1,0 +1,26 @@
+name: Linux Container echo Workflow
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: azure/docker-login@v1
+        with:
+          login-server: issuelist.azurecr.io/issuelistapp
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - run: |
+          docker build . -t issuelist.azurecr.io/issuelistapp:${{ github.sha }}
+          docker push issuelist.azurecr.io/issuelistapp:${{ github.sha }}
+
+      - uses: azure/webapps-deploy@v2
+        with:
+          app-name: "issuelist-app"
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          images: "issuelist.azurecr.io/issuelistapp:${{ github.sha }}"
