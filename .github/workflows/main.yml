@@ -16,7 +16,7 @@ jobs:
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - run: |
-          docker compose up -d --build
+          docker compose build 
           docker push issuelist.azurecr.io/issuelistapp:latets
 
       - uses: azure/webapps-deploy@v2
