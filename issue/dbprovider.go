@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -17,7 +18,8 @@ import (
 func Init(ctx context.Context) (*firestore.Client, error) {
 
 	// サービスアカウント読み込み
-	sa := option.WithCredentialsFile("path/to/GcpAccount.json")
+	sa := option.WithCredentialsJSON([]byte(os.Getenv("FIREBASE_KEYFILE_JSON")))
+	// sa := option.WithCredentialsFile("path/to/GcpAccount.json")
 	app, err := firebase.NewApp(ctx, nil, sa)
 	if err != nil {
 		log.Fatalln(err)
