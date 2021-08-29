@@ -16,6 +16,8 @@ func main() {
 
   var allowedOrigins = []string{
 	  "http://localhost:3000",
+	  "https://issue-list-web-aaih69tui-yoshida874.vercel.app/",
+
   }
   e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 	  AllowOrigins: allowedOrigins,
