@@ -39,7 +39,15 @@ func main() {
   issue.InitRouting(e)
   
   // Start server
-  e.Logger.Fatal(e.Start(":1323"))
+  e.Logger.Fatal(e.Start(":"+os.Getenv("PORT")))
+}
+
+func port() string {
+	port := os.Getenv("PORT")
+	if len(port) == 0 {
+		port = "8080"
+	}
+	return ":" + port
 }
 
 // http://localhost:1323/users/Joe
