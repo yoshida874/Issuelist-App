@@ -16,7 +16,7 @@ func main() {
 
   var allowedOrigins = []string{
 	  "http://localhost:3000",
-	  "https://issue-list-web-aaih69tui-yoshida874.vercel.app",
+	  "https://issue-list-web.vercel.app",
 
   }
   e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -41,6 +41,7 @@ func main() {
   issue.InitRouting(e)
   
   // Start server
+  // e.Logger.Fatal(e.Start(":1323"))
   e.Logger.Fatal(e.Start(":"+os.Getenv("PORT")))
 }
 
